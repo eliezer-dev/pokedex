@@ -2,19 +2,35 @@ const pokemonList = document.getElementById('pokemonList')
 
 const loadMoreButton = document.getElementById('loadMore')
 
+const pageInfo = document.querySelector('title')
+
 const limit = 10
 let offset = 0
 
 const maxRecord = 151
 
+if (pageInfo.dataset.page === "initialPage") {
+    loadPokemonsItens(offset,limit)
+    loadMoreButton.addEventListener('click', () => {
+        offset += limit
+        const qteRecordNextPage = offset + limit
+        if (qteRecordNextPage >= maxRecord) {
+            const newLimit = maxRecord - offset
+            loadPokemonsItens(offset,newLimit)
+            loadMoreButton.parentElement.removeChild(loadMoreButton)
+        
+        }else{      
+            loadPokemonsItens(offset,limit)
+        }
+    })
+}
 
-loadPokemonsItens(offset,limit)
 
 function loadPokemonsItens(offset,limit) {
     pokeApi.getPokemons(offset,limit).then((pokemons = []) => { 
         const newHTML =  pokemons.map((pokemon) => 
             `<li class="pokemon ${pokemon.type}">
-                    <span class="number">#${pokemon.number}</span>
+                    <span class="number" name="number">#${pokemon.number}</span>
                     <span class="name">${pokemon.name}</span>
                     <div class="detail">
                         <ol class="types">                      
@@ -23,23 +39,35 @@ function loadPokemonsItens(offset,limit) {
                         <img src="${pokemon.photo}" alt="${pokemon.name}">
                     </div>
         </li>     
-        `).join('')
+        `
+        ).join('')
         pokemonList.innerHTML += newHTML
+        AddClickPokemon()
+        
     })
+    
+    
 }
 
-loadMoreButton.addEventListener('click', () => {
-    offset += limit
-    const qteRecordNextPage = offset + limit
-    if (qteRecordNextPage >= maxRecord) {
-        const newLimit = maxRecord - offset
-        loadPokemonsItens(offset,newLimit)
-        loadMoreButton.parentElement.removeChild(loadMoreButton)
+
+
+function AddClickPokemon() {
     
-    }else{      
-        loadPokemonsItens(offset,limit)
-    }
-})
-   
-    
-    
+    const pokemonsLi = document.querySelectorAll('.pokemon')
+    pokemonsLi.forEach(pokemon => {
+        pokemon.addEventListener('click', function () {
+            const pokemonId = (pokemon.children.namedItem('number')).innerText[1]
+            sessionStorage.setItem('pokemonId', pokemonId)
+            window.location.href="pokemon.html"
+            //removeAllPokemons()
+            
+        })
+    })
+
+}
+
+
+
+
+
+
